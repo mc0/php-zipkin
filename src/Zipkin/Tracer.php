@@ -5,6 +5,7 @@ use Drefined\Zipkin\Core\Span;
 use Drefined\Zipkin\Transport\HTTPLogger;
 use Drefined\Zipkin\Transport\LoggerInterface;
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 
 class Tracer
 {
@@ -22,15 +23,35 @@ class Tracer
      * @param float           $sampled
      * @param bool            $debug
      */
-    public function __construct(LoggerInterface $logger, $sampled = 1.0, $debug = false)
+    public function __construct(array $config, ClientInterface $client, $sampled = 1.0, $debug = false)
     {
-        $this->logger = $logger;
+        $transport = $config['default'];
+
+        $this->logger = $this->makeLogger($config['transports'][$transport], $client);
 
         if ($sampled < 1.0) {
             $this->sampled = ($sampled == 0) ? false : ($sampled > (mt_rand() / mt_getrandmax()));
+        } else {
+            $this->sampled = $sampled;
         }
 
         $this->debug = $debug;
+    }
+
+    /**
+     * @param                 $config
+     * @param ClientInterface $client
+     * @return LoggerInterface
+     * @throws \Exception
+     */
+    public function makeLogger($config, ClientInterface $client) : LoggerInterface
+    {
+        switch ($config['driver']) {
+            case 'http':
+                return new HTTPLogger($client, $config['uri']);
+            default:
+                throw new \Exception('Zipkin Logger Not Exist');
+        }
     }
 
     /**
@@ -49,18 +70,5 @@ class Tracer
     public function setDebug(bool $debug)
     {
         $this->debug = $debug;
-    }
-
-    /**
-     * @param float $sampled
-     * @param bool  $debug
-     * @return Tracer
-     */
-    public static function generateHTTPTracer($sampled = 1.0, $debug = false)
-    {
-        $client = new Client();
-        $logger = new HTTPLogger($client);
-
-        return new self($logger, $sampled, $debug);
     }
 }

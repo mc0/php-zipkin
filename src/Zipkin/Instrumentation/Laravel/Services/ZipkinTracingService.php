@@ -1,29 +1,44 @@
 <?php
 namespace Drefined\Zipkin\Instrumentation\Laravel\Services;
 
-use Drefined\Zipkin\Core\Endpoint;
+use Illuminate\Contracts\Container\Container;
 use Drefined\Zipkin\Core\Trace;
 use Drefined\Zipkin\Tracer;
+use GuzzleHttp\Client;
 
+/**
+ * Class ZipkinTracingService
+ * @package Drefined\Zipkin\Instrumentation\Laravel\Services
+ */
 class ZipkinTracingService
 {
-    /** @var Trace $trace */
-    private $trace;
-
-    public function createTrace(
-        Tracer $tracer = null,
-        Endpoint $endpoint = null,
-        $sampled = 1.0,
-        $debug = false
-    ) {
-        $this->trace = new Trace($tracer, $endpoint, $sampled, $debug);
-    }
 
     /**
-     * @return Trace
+     * @var Container
      */
-    public function getTrace(): Trace
+    protected $container;
+
+    /**
+     * @param Container $container
+     */
+    public function __construct(Container $container)
     {
-        return $this->trace;
+        $this->container = $container;
+    }
+
+    public function createTrace($endpoint,
+                                $sampled,
+                                $debug) : Trace
+    {
+        $config = $this->container->make('config')->get('zipkin');
+
+        $tracer = new Tracer(
+            $config,
+            new Client(),
+            $sampled,
+            $debug
+        );
+
+        return new Trace($tracer, $endpoint, $sampled, $debug);
     }
 }
