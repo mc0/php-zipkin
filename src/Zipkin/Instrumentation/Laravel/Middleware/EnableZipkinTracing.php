@@ -130,11 +130,13 @@ class EnableZipkinTracing
          * @var Span $span
          */
         $span = $this->container->make('zipkin.request.span');
-        $time = time();
-        $span->setDuration($time - $span->getTimestamp());
+
+        $annotation = Annotation::generateServerSend();
+
+        $span->setDuration($annotation->getTimestamp() - ($this->requestAnnotations['annotations'][0])->getTimestamp());
 
         // 推入队列
-       dispatch(
+        dispatch(
             new PushToZipkin(
                 $endpoint,
                 $sampled,
@@ -143,7 +145,7 @@ class EnableZipkinTracing
                 [
                     'annotations'       => array_merge(
                         $this->requestAnnotations['annotations'],
-                        [Annotation::generateServerSend()]
+                        [$annotation]
                     ),
                     'binaryAnnotations' => array_merge(
                         $this->requestAnnotations['binaryAnnotations'],

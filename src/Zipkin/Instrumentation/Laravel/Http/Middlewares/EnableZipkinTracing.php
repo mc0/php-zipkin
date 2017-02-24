@@ -29,23 +29,22 @@ class EnableZipkinTracing
      * @return \Closure
      * @author         JohnWang <takato@vip.qq.com>
      */
-    public function register(Container $container)
+    public static function register(Container $container)
     {
         return function (callable $handler) use ($container) {
             return function (
                 RequestInterface $request,
                 array $options
             ) use ($handler, $container) {
-                /**
-                 * @var Span $parentSpan
-                 */
-                $parentSpan = $container->make('zipkin.request.span');
-
                 $method = $request->getMethod();
                 $uri = $request->getUri();
                 $name = "{$method} {$uri}";
 
-                if ($parentSpan) {
+                if ($container->bound('zipkin.request.span')) {
+                    /**
+                     * @var Span $parentSpan
+                     */
+                    $parentSpan = $container->make('zipkin.request.span');
                     $traceId = $parentSpan->getTraceId();
                     $parentSpanId = $parentSpan->getSpanId();
                     $debug = $container->make('zipkin.debug');
@@ -99,8 +98,9 @@ class EnableZipkinTracing
 
                 return $promise->then(
                     function (ResponseInterface $response) use ($endpoint, $span, $sampled, $debug, $requestAnnotations) {
-                        $time = time();
-                        $span->setDuration($time - $span->getTimestamp());
+                        $annotation = Annotation::generateClientRecv();
+
+                        $span->setDuration($annotation->getTimestamp() - ($requestAnnotations['annotations'][0])->getTimestamp());
 
                         // 推入队列
                         dispatch(
@@ -112,7 +112,7 @@ class EnableZipkinTracing
                                 [
                                     'annotations'       => array_merge(
                                         $requestAnnotations['annotations'],
-                                        [Annotation::generateClientRecv()]
+                                        [$annotation]
                                     ),
                                     'binaryAnnotations' => array_merge(
                                         $requestAnnotations['binaryAnnotations'],
