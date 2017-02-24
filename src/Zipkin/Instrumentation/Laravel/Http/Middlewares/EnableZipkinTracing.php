@@ -40,7 +40,7 @@ class EnableZipkinTracing
                 $uri = $request->getUri();
                 $name = "{$method} {$uri}";
 
-                if ($container->bound('zipkin.request.span')) {
+                if ($container->bound('zipkin.trace_id')) {
                     /**
                      * @var Span $parentSpan
                      */
@@ -83,6 +83,10 @@ class EnableZipkinTracing
                         $debug,
                         time()
                     );
+
+                    $container->singleton('zipkin.trace_id', function () use ($traceId) {
+                        return $traceId;
+                    });
                 }
 
                 $requestAnnotations = [

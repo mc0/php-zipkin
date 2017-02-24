@@ -80,6 +80,10 @@ class EnableZipkinTracing
             time()
         );
 
+        $this->container->singleton('zipkin.trace_id', function () use ($traceId) {
+            return $traceId;
+        });
+
         $this->container->singleton('zipkin.endpoint', function () use ($endpoint) {
             return $endpoint;
         });
@@ -108,9 +112,6 @@ class EnableZipkinTracing
         $response = $next($request);
 
         $this->terminate($request, $response);
-
-        $response->header('X-B3-TraceId', $span->getTraceId());
-        $response->header('X-B3-SpanId', $span->getSpanId());
 
         return $response;
     }
