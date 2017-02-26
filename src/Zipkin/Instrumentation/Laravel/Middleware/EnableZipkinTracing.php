@@ -45,15 +45,13 @@ class EnableZipkinTracing
      */
     public function handle(Request $request, Closure $next)
     {
+        $spanId = Identifier::generate()->__toString();
         $traceId = $request->header('X-B3-TraceId', null);
         if ($traceId === null) {
-            $traceId = Identifier::generate()->__toString();
+            $traceId = $spanId;
         }
 
         $parentSpanId = $request->header('X-B3-SpanId', null);
-        if ($parentSpanId === null) {
-            $parentSpanId = $traceId;
-        }
 
         $config = $this->container->make('config')->get('zipkin');
 
@@ -72,8 +70,8 @@ class EnableZipkinTracing
         $span = new Span(
             $name,
             new Identifier($traceId),
-            Identifier::generate(),
-            new Identifier($parentSpanId),
+            new Identifier($spanId),
+            $parentSpanId ? new Identifier($parentSpanId) : null,
             [],
             [],
             $debug,
