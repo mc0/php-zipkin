@@ -47,12 +47,12 @@ class EnableZipkinTracing
     {
         $traceId = $request->header('X-B3-TraceId', null);
         if ($traceId === null) {
-            return $next($request);
+            $traceId = Identifier::generate();
         }
 
         $parentSpanId = $request->header('X-B3-SpanId', null);
         if ($parentSpanId === null) {
-            return $next($request);
+            $parentSpanId = $traceId;
         }
 
         $config = $this->container->make('config')->get('zipkin');

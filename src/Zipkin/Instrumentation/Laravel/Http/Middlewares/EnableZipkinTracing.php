@@ -89,6 +89,11 @@ class EnableZipkinTracing
                     });
                 }
 
+                $request = $request->withHeader('X-B3-TraceId', $traceId)
+                    ->withHeader('X-B3-SpanId', $span->getSpanId())
+                    ->withHeader('X-B3-Sampled', $sampled)
+                    ->withHeader('X-B3-Flags', $debug ? 1 : 0);
+
                 $requestAnnotations = [
                     'annotations'       => [Annotation::generateClientSend()],
                     'binaryAnnotations' => [
