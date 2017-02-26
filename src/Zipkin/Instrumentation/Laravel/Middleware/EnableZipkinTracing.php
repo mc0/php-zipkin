@@ -47,7 +47,7 @@ class EnableZipkinTracing
     {
         $traceId = $request->header('X-B3-TraceId', null);
         if ($traceId === null) {
-            $traceId = Identifier::generate();
+            $traceId = Identifier::generate()->__toString();
         }
 
         $parentSpanId = $request->header('X-B3-SpanId', null);

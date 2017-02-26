@@ -85,7 +85,7 @@ class EnableZipkinTracing
                     );
 
                     $container->singleton('zipkin.trace_id', function () use ($traceId) {
-                        return $traceId;
+                        return $traceId->__toString();
                     });
                 }
 
