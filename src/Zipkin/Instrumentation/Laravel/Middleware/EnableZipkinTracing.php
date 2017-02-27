@@ -64,8 +64,8 @@ class EnableZipkinTracing
         $sampled = $request->header('X-B3-Sampled', 1.0);
         $debug = $request->header('X-B3-Flags', false);
         $method = $request->getMethod();
-        $uri = $request->getRequestUri();
-        $name = "{$method} {$uri}";
+        $uri = $request->getUri();
+        $name = $method . ' ' . explode('?', $uri)[0];
 
         $span = new Span(
             $name,

@@ -38,7 +38,7 @@ class EnableZipkinTracing
             ) use ($handler, $container) {
                 $method = $request->getMethod();
                 $uri = $request->getUri();
-                $name = "{$method} {$uri}";
+                $name = $method . ' ' . explode('?', $uri)[0];
 
                 if ($container->bound('zipkin.request.span')) {
                     /**
