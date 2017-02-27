@@ -109,7 +109,8 @@ class EnableZipkinTracing
                     function (ResponseInterface $response) use ($endpoint, $span, $sampled, $debug, $requestAnnotations) {
                         $annotation = Annotation::generateClientRecv();
 
-                        $span->setDuration($annotation->getTimestamp() - ($requestAnnotations['annotations'][0])->getTimestamp());
+                        $requestAnnotation = $requestAnnotations['annotations'][0];
+                        $span->setDuration($annotation->getTimestamp() - $requestAnnotation->getTimestamp());
 
                         // 推入队列
                         dispatch(

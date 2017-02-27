@@ -53,8 +53,8 @@ class Trace
         $timestamp = null,
         $duration = null
     ) {
-        $traceId = $traceId ?? $this->traceId;
-        $spanId  = $spanId ?? Identifier::generate();
+        $traceId = $traceId ?: $this->traceId;
+        $spanId  = $spanId ?: Identifier::generate();
 
         if (!empty($this->spans) && empty($parentSpanId)) {
             $parentSpan   = end($this->spans);
