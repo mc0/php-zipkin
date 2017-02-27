@@ -52,7 +52,7 @@ class HTTPLogger implements LoggerInterface
      * @param Span $span
      * @return array
      */
-    public function spanToArray(Span $span): array
+    public function spanToArray(Span $span)
     {
         return $span->toArray();
     }

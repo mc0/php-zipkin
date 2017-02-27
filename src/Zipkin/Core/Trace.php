@@ -94,7 +94,7 @@ class Trace
     /**
      * @return Identifier
      */
-    public function getTraceId(): Identifier
+    public function getTraceId()
     {
         return $this->traceId;
     }
@@ -102,7 +102,7 @@ class Trace
     /**
      * @return Span[]
      */
-    public function getSpans(): array
+    public function getSpans()
     {
         return $this->spans;
     }
@@ -110,7 +110,7 @@ class Trace
     /**
      * @return Span
      */
-    public function popSpan(): Span
+    public function popSpan()
     {
         return array_pop($this->spans);
     }

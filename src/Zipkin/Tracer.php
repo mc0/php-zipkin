@@ -44,7 +44,7 @@ class Tracer
      * @return LoggerInterface
      * @throws \Exception
      */
-    public function makeLogger($config, ClientInterface $client) : LoggerInterface
+    public function makeLogger($config, ClientInterface $client)
     {
         switch ($config['driver']) {
             case 'http':
@@ -67,7 +67,7 @@ class Tracer
     /**
      * @param boolean $debug
      */
-    public function setDebug(bool $debug)
+    public function setDebug($debug)
     {
         $this->debug = $debug;
     }

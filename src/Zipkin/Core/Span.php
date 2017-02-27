@@ -66,7 +66,7 @@ class Span
     /**
      * @return string
      */
-    public function getName(): string
+    public function getName()
     {
         return $this->name;
     }
@@ -74,7 +74,7 @@ class Span
     /**
      * @return Identifier
      */
-    public function getTraceId(): Identifier
+    public function getTraceId()
     {
         return $this->traceId;
     }
@@ -82,7 +82,7 @@ class Span
     /**
      * @return Identifier
      */
-    public function getSpanId(): Identifier
+    public function getSpanId()
     {
         return $this->spanId;
     }
@@ -98,7 +98,7 @@ class Span
     /**
      * @return Annotation[]
      */
-    public function getAnnotations(): array
+    public function getAnnotations()
     {
         return $this->annotations;
     }
@@ -106,7 +106,7 @@ class Span
     /**
      * @return BinaryAnnotation[]
      */
-    public function getBinaryAnnotations(): array
+    public function getBinaryAnnotations()
     {
         return $this->binaryAnnotations;
     }
@@ -114,7 +114,7 @@ class Span
     /**
      * @return bool
      */
-    public function getDebug(): bool
+    public function getDebug()
     {
         return $this->debug;
     }
@@ -162,7 +162,7 @@ class Span
     /**
      * @return array
      */
-    public function toArray(): array
+    public function toArray()
     {
         $parentSpanId = (string)$this->getParentSpanId();
 
@@ -183,7 +183,7 @@ class Span
      * @param Annotation $annotation
      * @return array
      */
-    public function annotationToArray(Annotation $annotation): array
+    public function annotationToArray(Annotation $annotation)
     {
         return $annotation->toArray();
     }
@@ -192,7 +192,7 @@ class Span
      * @param BinaryAnnotation $binaryAnnotation
      * @return array
      */
-    public function binaryAnnotationToArray(BinaryAnnotation $binaryAnnotation): array
+    public function binaryAnnotationToArray(BinaryAnnotation $binaryAnnotation)
     {
         return $binaryAnnotation->toArray();
     }

@@ -32,7 +32,7 @@ class Endpoint
     /**
      * @return string
      */
-    public function getIpv4(): string
+    public function getIpv4()
     {
         return $this->ipv4;
     }
@@ -40,7 +40,7 @@ class Endpoint
     /**
      * @return int
      */
-    public function getPort(): int
+    public function getPort()
     {
         return $this->port;
     }
@@ -48,7 +48,7 @@ class Endpoint
     /**
      * @return string
      */
-    public function getServiceName(): string
+    public function getServiceName()
     {
         return $this->serviceName;
     }
@@ -64,7 +64,7 @@ class Endpoint
     /**
      * @return array
      */
-    public function toArray(): array
+    public function toArray()
     {
         $data = [
             'serviceName' => $this->getServiceName(),

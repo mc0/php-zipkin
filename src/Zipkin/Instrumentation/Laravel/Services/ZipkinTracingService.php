@@ -28,7 +28,7 @@ class ZipkinTracingService
 
     public function createTrace($endpoint,
                                 $sampled,
-                                $debug) : Trace
+                                $debug)
     {
         $config = $this->container->make('config')->get('zipkin');
 
