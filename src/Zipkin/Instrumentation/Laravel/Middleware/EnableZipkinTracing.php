@@ -133,7 +133,7 @@ class EnableZipkinTracing
         $annotation = Annotation::generateServerSend();
 
         $requestAnnotation = $this->requestAnnotations['annotations'][0];
-        $span->setDuration($annotation->getTimestamp() - $requestAnnotation->getTimestamp());
+        $span->setDuration((int)($annotation->getTimestamp() - $requestAnnotation->getTimestamp()));
 
         // 推入队列
         dispatch(
