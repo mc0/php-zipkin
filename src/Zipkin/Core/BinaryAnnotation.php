@@ -93,8 +93,8 @@ class BinaryAnnotation
     public function toArray()
     {
         return [
-            'key'      => $this->getKey(),
-            'value'    => $this->getValue(),
+            'key'      => (string)$this->getKey(),
+            'value'    => (string)$this->getValue(),
             'endpoint' => $this->getEndpoint()
                                ->toArray(),
         ];

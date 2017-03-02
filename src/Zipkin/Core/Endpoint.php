@@ -42,7 +42,7 @@ class Endpoint
      */
     public function getPort()
     {
-        return (int)$this->port;
+        return $this->port;
     }
 
     /**
@@ -67,19 +67,19 @@ class Endpoint
     public function toArray()
     {
         $data = [
-            'serviceName' => $this->getServiceName(),
+            'serviceName' => (string)$this->getServiceName(),
         ];
 
         if (!empty($this->getIpv4())) {
-            $data['ipv4'] = $this->getIpv4();
+            $data['ipv4'] = (string)$this->getIpv4();
         }
 
         if (!empty($this->getPort())) {
-            $data['port'] = $this->getPort();
+            $data['port'] = (int)$this->getPort();
         }
 
         if (!empty($this->getIpv6())) {
-            $data['ipv6'] = $this->getIpv6();
+            $data['ipv6'] = (string)$this->getIpv6();
         }
 
         return $data;

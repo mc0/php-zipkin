@@ -168,12 +168,12 @@ class Span
 
         return [
             'id'                => (string)$this->getSpanId(),
-            'name'              => $this->getName(),
+            'name'              => (string)$this->getName(),
             'traceId'           => (string)$this->getTraceId(),
-            'parentId'          => (empty($parentSpanId)) ? null : $parentSpanId,
-            'timestamp'         => $this->getTimestamp(),
-            'duration'          => $this->getDuration(),
-//            'debug'             => $this->getDebug(),
+            'parentId'          => (empty($parentSpanId)) ? null : (string)$parentSpanId,
+            'timestamp'         => (int)$this->getTimestamp(),
+            'duration'          => (int)$this->getDuration(),
+            'debug'             => (boolean)$this->getDebug(),
             'annotations'       => array_map([$this, 'annotationToArray'], $this->getAnnotations()),
             'binaryAnnotations' => array_map([$this, 'binaryAnnotationToArray'], $this->getBinaryAnnotations()),
         ];

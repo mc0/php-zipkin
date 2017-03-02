@@ -118,8 +118,8 @@ class Annotation
     public function toArray()
     {
         return [
-            'value'     => $this->getValue(),
-            'timestamp' => $this->getTimestamp(),
+            'value'     => (string)$this->getValue(),
+            'timestamp' => (int)$this->getTimestamp(),
             'endpoint'  => $this->getEndpoint()
                                 ->toArray(),
         ];
