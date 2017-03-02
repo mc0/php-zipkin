@@ -74,8 +74,7 @@ class EnableZipkinTracing
             $parentSpanId ? new Identifier($parentSpanId) : null,
             [],
             [],
-            $debug,
-            Time::microseconds()
+            $debug
         );
 
         $this->container->singleton('zipkin.trace_id', function () use ($traceId) {
@@ -133,6 +132,7 @@ class EnableZipkinTracing
         $annotation = Annotation::generateServerSend();
 
         $requestAnnotation = $this->requestAnnotations['annotations'][0];
+        $span->setTimestamp($requestAnnotation->getTimestamp());
         $span->setDuration((int)($annotation->getTimestamp() - $requestAnnotation->getTimestamp()));
 
         // 推入队列

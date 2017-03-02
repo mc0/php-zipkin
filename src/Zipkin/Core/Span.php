@@ -120,6 +120,14 @@ class Span
     }
 
     /**
+     * @param int $timestamp
+     */
+    public function setTimestamp($timestamp)
+    {
+        $this->timestamp = $timestamp;
+    }
+
+    /**
      * @return int|null
      */
     public function getTimestamp()

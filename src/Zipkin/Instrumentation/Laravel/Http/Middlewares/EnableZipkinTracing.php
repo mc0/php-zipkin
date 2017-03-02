@@ -80,8 +80,7 @@ class EnableZipkinTracing
                         null,
                         [],
                         [],
-                        $debug,
-                        Time::microseconds()
+                        $debug
                     );
 
                     $container->singleton('zipkin.trace_id', function () use ($traceId) {
@@ -110,6 +109,7 @@ class EnableZipkinTracing
                         $annotation = Annotation::generateClientRecv();
 
                         $requestAnnotation = $requestAnnotations['annotations'][0];
+                        $span->setTimestamp($requestAnnotation->getTimestamp());
                         $span->setDuration((int)($annotation->getTimestamp() - $requestAnnotation->getTimestamp()));
 
                         // 推入队列
