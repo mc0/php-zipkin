@@ -173,7 +173,7 @@ class Span
             'parentId'          => (empty($parentSpanId)) ? null : $parentSpanId,
             'timestamp'         => $this->getTimestamp(),
             'duration'          => $this->getDuration(),
-            'debug'             => $this->getDebug(),
+//            'debug'             => $this->getDebug(),
             'annotations'       => array_map([$this, 'annotationToArray'], $this->getAnnotations()),
             'binaryAnnotations' => array_map([$this, 'binaryAnnotationToArray'], $this->getBinaryAnnotations()),
         ];

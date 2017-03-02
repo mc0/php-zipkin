@@ -42,7 +42,7 @@ class Endpoint
      */
     public function getPort()
     {
-        return $this->port;
+        return (int)$this->port;
     }
 
     /**

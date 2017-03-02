@@ -14,6 +14,7 @@ use Drefined\Zipkin\Core\BinaryAnnotation;
 use Drefined\Zipkin\Core\Endpoint;
 use Drefined\Zipkin\Core\Identifier;
 use Drefined\Zipkin\Core\Span;
+use Drefined\Zipkin\Core\Time;
 use Drefined\Zipkin\Instrumentation\Laravel\Jobs\PushToZipkin;
 use Illuminate\Contracts\Container\Container;
 use Psr\Http\Message\RequestInterface;
@@ -36,9 +37,8 @@ class EnableZipkinTracing
                 RequestInterface $request,
                 array $options
             ) use ($handler, $container) {
-                $method = $request->getMethod();
                 $uri = $request->getUri();
-                $name = $method . ' ' . explode('?', $uri)[0];
+                $name = $request->getMethod();
 
                 if ($container->bound('zipkin.request.span')) {
                     /**
@@ -81,7 +81,7 @@ class EnableZipkinTracing
                         [],
                         [],
                         $debug,
-                        time()
+                        Time::microseconds()
                     );
 
                     $container->singleton('zipkin.trace_id', function () use ($traceId) {

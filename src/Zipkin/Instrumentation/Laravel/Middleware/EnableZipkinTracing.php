@@ -7,6 +7,7 @@ use Drefined\Zipkin\Core\BinaryAnnotation;
 use Drefined\Zipkin\Core\Endpoint;
 use Drefined\Zipkin\Core\Identifier;
 use Drefined\Zipkin\Core\Span;
+use Drefined\Zipkin\Core\Time;
 use Drefined\Zipkin\Instrumentation\Laravel\Jobs\PushToZipkin;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\Request;
@@ -63,9 +64,8 @@ class EnableZipkinTracing
 
         $sampled = $request->header('X-B3-Sampled', 1.0);
         $debug = $request->header('X-B3-Flags', false);
-        $method = $request->getMethod();
         $uri = $request->getUri();
-        $name = $method . ' ' . explode('?', $uri)[0];
+        $name = $request->getMethod();
 
         $span = new Span(
             $name,
@@ -75,7 +75,7 @@ class EnableZipkinTracing
             [],
             [],
             $debug,
-            time()
+            Time::microseconds()
         );
 
         $this->container->singleton('zipkin.trace_id', function () use ($traceId) {
