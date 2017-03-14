@@ -120,6 +120,10 @@ class EnableZipkinTracing
      */
     public function terminate(Request $request, Response $response)
     {
+        if (!$this->requestAnnotations) {
+            return;
+        }
+
         $endpoint = $this->container->make('zipkin.endpoint');
         $sampled = $this->container->make('zipkin.sampled');
         $debug = $this->container->make('zipkin.debug');
