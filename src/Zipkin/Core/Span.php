@@ -144,14 +144,6 @@ class Span
     }
 
     /**
-     * @param int $duration
-     */
-    public function setDuration($duration)
-    {
-        $this->duration = $duration;
-    }
-
-    /**
      * @param Annotation[] $annotations
      */
     public function setAnnotations(array $annotations)

@@ -1,9 +1,9 @@
 {
-  "name": "takatost/php-zipkin",
+  "name": "drefined/php-zipkin",
   "type": "library",
   "description": "Zipkin's PHP tracer library",
   "keywords": ["zipkin", "php", "tracing", "tracer"],
-  "homepage": "https://github.com/takatost/php-zipkin",
+  "homepage": "https://github.com/drefined/php-zipkin",
   "license": "MIT",
   "authors": [
     {

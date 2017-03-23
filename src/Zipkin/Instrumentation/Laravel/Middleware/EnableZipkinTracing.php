@@ -18,23 +18,18 @@ class EnableZipkinTracing
     /**
      * The application instance.
      *
-     * @var Container $container
+     * @var Application $app
      */
-    protected $container;
-
-    /**
-     * @var
-     */
-    protected $requestAnnotations;
+    protected $app;
 
     /**
      * Create a new middleware instance.
      *
-     * @param Container $container
+     * @param Application $app
      */
-    public function __construct(Container $container)
+    public function __construct(Application $app)
     {
-        $this->container = $container;
+        $this->app = $app;
     }
 
     /**
@@ -46,119 +41,47 @@ class EnableZipkinTracing
      */
     public function handle(Request $request, Closure $next)
     {
-        $spanId = Identifier::generate()->__toString();
-        $traceId = $request->header('X-B3-TraceId', null);
-        if ($traceId === null) {
-            $traceId = $spanId;
-        }
+        $method    = $request->getMethod();
+        $uri       = $request->getRequestUri();
+        $query     = $request->query->all();
+        $ipAddress = $request->server('SERVER_ADDR') ?? '127.0.0.1';
+        $port      = $request->server('SERVER_PORT');
+        $name      = "{$method} {$uri}";
 
-        $parentSpanId = $request->header('X-B3-SpanId', null);
+        $spanId       = $request->header('X-B3-SpanId') ?? null;
+        $parentSpanId = $request->header('X-B3-ParentSpanId') ?? null;
+        $sampled      = $request->header('X-B3-Sampled') ?? 1.0;
+        $debug        = $request->header('X-B3-Flags') ?? false;
 
-        $config = $this->container->make('config')->get('zipkin');
+        /** @var ZipkinTracingService $tracingService */
+        $tracingService = $this->app->make(ZipkinTracingService::class);
 
-        $endpoint = new Endpoint(
-            $request->server('SERVER_ADDR', '127.0.0.1'),
-            $request->server('SERVER_PORT', '80'),
-            $config['name']
-        );
+        $endpoint = new Endpoint($ipAddress, $port, 'laravel-app');
+        $tracingService->createTrace(null, $endpoint, $sampled, $debug);
 
-        $sampled = $request->header('X-B3-Sampled', 1.0);
-        $debug = $request->header('X-B3-Flags', false);
-        $uri = $request->getUri();
-        $name = $request->getMethod();
-
-        $span = new Span(
-            $name,
-            new Identifier($traceId),
-            new Identifier($spanId),
-            $parentSpanId ? new Identifier($parentSpanId) : null,
-            [],
-            [],
-            $debug
-        );
-
-        $this->container->singleton('zipkin.trace_id', function () use ($traceId) {
-            return $traceId;
-        });
-
-        $this->container->singleton('zipkin.endpoint', function () use ($endpoint) {
-            return $endpoint;
-        });
-
-        $this->container->singleton('zipkin.sampled', function () use ($sampled) {
-            return $sampled;
-        });
-
-        $this->container->singleton('zipkin.debug', function () use ($debug) {
-            return $debug;
-        });
-
-        $this->container->singleton('zipkin.request.span', function () use ($span) {
-            return $span;
-        });
-
-        $this->requestAnnotations = [
-            'annotations'       => [Annotation::generateServerRecv()],
-            'binaryAnnotations' => [
-                BinaryAnnotation::generateString('server.env', $this->container->environment()),
+        $trace = $tracingService->getTrace();
+        $trace->createNewSpan($name, null, $spanId, $parentSpanId);
+        $trace->record(
+            [Annotation::generateServerRecv()],
+            [
+                BinaryAnnotation::generateString('server.env', $this->app->environment()),
                 BinaryAnnotation::generateString('server.request.uri', $uri),
-                BinaryAnnotation::generateString('server.request.query', json_encode($request->query->all())),
+                BinaryAnnotation::generateString('server.request.query', json_encode($query)),
             ]
-        ];
+        );
 
-        $response = $next($request);
-
-        $this->terminate($request, $response);
-
-        return $response;
+        return $next($request);
     }
 
-    /**
-     * @param Request  $request
-     * @param Response $response
-     * @author         JohnWang <takato@vip.qq.com>
-     */
     public function terminate(Request $request, Response $response)
     {
-        if (!$this->requestAnnotations) {
-            return;
-        }
+        /** @var ZipkinTracingService $tracingService */
+        $tracingService = $this->app->make(ZipkinTracingService::class);
 
-        $endpoint = $this->container->make('zipkin.endpoint');
-        $sampled = $this->container->make('zipkin.sampled');
-        $debug = $this->container->make('zipkin.debug');
-
-        /**
-         * @var Span $span
-         */
-        $span = $this->container->make('zipkin.request.span');
-
-        $annotation = Annotation::generateServerSend();
-
-        $requestAnnotation = $this->requestAnnotations['annotations'][0];
-        $span->setTimestamp($requestAnnotation->getTimestamp());
-        $span->setDuration((int)($annotation->getTimestamp() - $requestAnnotation->getTimestamp()));
-
-        // 推入队列
-        dispatch(
-            new PushToZipkin(
-                $endpoint,
-                $sampled,
-                $debug,
-                $span,
-                [
-                    'annotations'       => array_merge(
-                        $this->requestAnnotations['annotations'],
-                        [$annotation]
-                    ),
-                    'binaryAnnotations' => array_merge(
-                        $this->requestAnnotations['binaryAnnotations'],
-                        [
-                            BinaryAnnotation::generateString('server.response.http_status_code', $response->getStatusCode())
-                        ]
-                    )
-                ]
-            )
+        $trace = $tracingService->getTrace();
+        $trace->record(
+            [Annotation::generateServerSend()],
+            [BinaryAnnotation::generateString('server.response.http_status_code', $response->getStatusCode())]
         );
     }
 }

@@ -32,17 +32,24 @@ class Trace
      * @param bool          $debug
      */
     public function __construct(
-        Tracer $tracer,
-        Endpoint $endpoint,
+        Tracer $tracer = null,
+        Endpoint $endpoint = null,
         $sampled = 1.0,
         $debug = false
     ) {
-        $this->tracer = $tracer;
-        $this->endpoint = $endpoint;
+        $this->traceId = Identifier::generate();
         $this->sampled = $sampled;
         $this->debug   = $debug;
 
-        $this->traceId = Identifier::generate();
+        if (empty($tracer)) {
+            $client       = new Client();
+            $logger       = new HTTPLogger($client);
+            $this->tracer = new Tracer($logger, $sampled, $debug);
+        } else {
+            $this->tracer = $tracer;
+        }
+
+        $this->endpoint = $endpoint;
     }
 
     public function createNewSpan(
@@ -65,11 +72,10 @@ class Trace
     }
 
     /**
-     * @param Span               $span
      * @param Annotation[]       $annotations
      * @param BinaryAnnotation[] $binaryAnnotations
      */
-    public function record(Span $span, array $annotations = [], array $binaryAnnotations = [])
+    public function record(array $annotations = [], array $binaryAnnotations = [])
     {
         foreach ($annotations as $annotation) {
             if (empty($annotation->getEndpoint()) && $this->endpoint) {
@@ -82,6 +88,8 @@ class Trace
                 $binaryAnnotation->setEndpoint($this->endpoint);
             }
         }
+
+        $span = end($this->spans);
 
         $span->setAnnotations($annotations);
         $span->setBinaryAnnotations($binaryAnnotations);
