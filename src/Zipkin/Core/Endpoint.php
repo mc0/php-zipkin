@@ -3,29 +3,29 @@ namespace Drefined\Zipkin\Core;
 
 class Endpoint
 {
+    /** @var string $serviceName */
+    private $serviceName;
+
     /** @var string $ipv4 */
     private $ipv4;
 
     /** @var int $port */
     private $port;
 
-    /** @var string $serviceName */
-    private $serviceName;
-
     /** @var string $ipv6 (optional) */
     private $ipv6;
 
     /**
-     * @param string      $ipv4
-     * @param int         $port
      * @param string      $serviceName
+     * @param string|null $ipv4
+     * @param int|null    $port
      * @param string|null $ipv6
      */
-    public function __construct($ipv4, $port, $serviceName, $ipv6 = null)
+    public function __construct($serviceName, $ipv4 = null, $port = null, $ipv6 = null)
     {
-        $this->ipv4        = $ipv4;
-        $this->port        = $port;
         $this->serviceName = $serviceName;
+        $this->ipv4        = $ipv4 ?: "0.0.0.0";
+        $this->port        = $port ?: 0;
         $this->ipv6        = $ipv6;
     }
 

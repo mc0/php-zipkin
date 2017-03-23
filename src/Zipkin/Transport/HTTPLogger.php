@@ -17,7 +17,7 @@ class HTTPLogger implements LoggerInterface
      * @param ClientInterface $client
      * @param string          $baseUrl
      */
-    public function __construct(ClientInterface $client, $baseUrl = 'http://localhost:9411/api/v1/spans')
+    public function __construct(ClientInterface $client, $baseUrl)
     {
         $this->client  = $client;
         $this->baseUrl = $baseUrl;
@@ -44,6 +44,8 @@ class HTTPLogger implements LoggerInterface
 
             $this->client->request('POST', $this->baseUrl, $options);
         } catch (RequestException $e) {
+
+            var_dump($e->getMessage());
             throw new \Exception("Failed to publish trace: {$e->getMessage()}", $e->getCode(), $e);
         }
     }

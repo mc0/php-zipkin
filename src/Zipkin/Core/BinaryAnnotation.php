@@ -20,16 +20,16 @@ class BinaryAnnotation
     /** @var int $type */
     private $type;
 
-    /** @var Endpoint|null $endpoint */
+    /** @var Endpoint $endpoint */
     private $endpoint;
 
     /**
      * @param string        $key
      * @param string        $value
      * @param int           $type
-     * @param Endpoint|null $endpoint
+     * @param Endpoint      $endpoint
      */
-    public function __construct($key, $value, $type, Endpoint $endpoint = null)
+    public function __construct($key, $value, $type, Endpoint $endpoint)
     {
         $this->key      = $key;
         $this->value    = $value;
@@ -62,7 +62,7 @@ class BinaryAnnotation
     }
 
     /**
-     * @return Endpoint|null
+     * @return Endpoint
      */
     public function getEndpoint()
     {
@@ -78,16 +78,6 @@ class BinaryAnnotation
     }
 
     /**
-     * @param string $key
-     * @param string $value
-     * @return BinaryAnnotation
-     */
-    public static function generateString($key, $value)
-    {
-        return new self($key, $value, self::TYPE_STRING);
-    }
-
-    /**
      * @return array
      */
     public function toArray()
@@ -95,8 +85,7 @@ class BinaryAnnotation
         return [
             'key'      => (string)$this->getKey(),
             'value'    => (string)$this->getValue(),
-            'endpoint' => $this->getEndpoint()
-                               ->toArray(),
+            'endpoint' => $this->getEndpoint()->toArray(),
         ];
     }
 }

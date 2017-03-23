@@ -11,30 +11,22 @@ class Annotation
     /** @var string $value */
     private $value;
 
+    /** @var Endpoint $endpoint */
+    private $endpoint;
+
     /** @var int $timestamp */
     private $timestamp;
 
-    /** @var Endpoint|null $endpoint */
-    private $endpoint;
-
     /**
      * @param int           $value
-     * @param string        $timestamp
      * @param Endpoint|null $endpoint
+     * @param string|null   $timestamp
      */
-    public function __construct($value, $timestamp, Endpoint $endpoint = null)
+    public function __construct($value, Endpoint $endpoint, $timestamp = null)
     {
         $this->value     = $value;
-        $this->timestamp = $timestamp;
         $this->endpoint  = $endpoint;
-    }
-
-    /**
-     * @return int
-     */
-    public function getTimestamp()
-    {
-        return $this->timestamp;
+        $this->timestamp = $timestamp ?: Time::microseconds();
     }
 
     /**
@@ -46,11 +38,19 @@ class Annotation
     }
 
     /**
-     * @return Endpoint|null
+     * @return Endpoint
      */
     public function getEndpoint()
     {
         return $this->endpoint;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTimestamp()
+    {
+        return $this->timestamp;
     }
 
     /**
@@ -62,57 +62,6 @@ class Annotation
     }
 
     /**
-     * @param string        $value
-     * @param int|null      $timestamp
-     * @param Endpoint|null $endpoint
-     * @return Annotation
-     */
-    public static function generateTimestamp($value, $timestamp = null, Endpoint $endpoint = null)
-    {
-        if (empty($timestamp)) {
-            $timestamp = Time::microseconds();
-        }
-
-        return new self($value, $timestamp, $endpoint);
-    }
-
-    /**
-     * @param int|null $timestamp
-     * @return Annotation
-     */
-    public static function generateClientSend($timestamp = null)
-    {
-        return self::generateTimestamp(self::CLIENT_SEND, $timestamp);
-    }
-
-    /**
-     * @param int|null $timestamp
-     * @return Annotation
-     */
-    public static function generateClientRecv($timestamp = null)
-    {
-        return self::generateTimestamp(self::CLIENT_RECV, $timestamp);
-    }
-
-    /**
-     * @param int|null $timestamp
-     * @return Annotation
-     */
-    public static function generateServerSend($timestamp = null)
-    {
-        return self::generateTimestamp(self::SERVER_SEND, $timestamp);
-    }
-
-    /**
-     * @param int|null $timestamp
-     * @return Annotation
-     */
-    public static function generateServerRecv($timestamp = null)
-    {
-        return self::generateTimestamp(self::SERVER_RECV, $timestamp);
-    }
-
-    /**
      * @return array
      */
     public function toArray()
@@ -120,8 +69,7 @@ class Annotation
         return [
             'value'     => (string)$this->getValue(),
             'timestamp' => (int)$this->getTimestamp(),
-            'endpoint'  => $this->getEndpoint()
-                                ->toArray(),
+            'endpoint'  => $this->getEndpoint()->toArray(),
         ];
     }
 }

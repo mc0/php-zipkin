@@ -1,66 +1,57 @@
 <?php
 namespace Drefined\Zipkin;
 
+use Drefined\Zipkin\Core\Identifier;
 use Drefined\Zipkin\Core\Span;
-use Drefined\Zipkin\Transport\HTTPLogger;
-use Drefined\Zipkin\Transport\LoggerInterface;
-use GuzzleHttp\Client;
 
 class Tracer
 {
-    /** @var LoggerInterface $logger */
-    private $logger;
+    /** @var Recorder $tracer */
+    private $recorder;
 
-    /** @var float $sampled */
-    private $sampled;
-
-    /** @var bool $debug */
-    private $debug;
+    /** @var bool $sample */
+    private $sample;
 
     /**
-     * @param LoggerInterface $logger
-     * @param float           $sampled
-     * @param bool            $debug
+     * @param Recorder $recorder
+     * @param float $sample
      */
-    public function __construct(LoggerInterface $logger, $sampled = 1.0, $debug = false)
-    {
-        $this->logger = $logger;
+    public function __construct(Recorder $recorder, $sample = 1.0) {
+        $this->recorder = $recorder;
+        $this->sample = $sample;
+    }
 
-        if ($sampled < 1.0) {
-            $this->sampled = ($sampled == 0) ? false : ($sampled > (mt_rand() / mt_getrandmax()));
+    /**
+     * @param string $name
+     * @param string|null $traceId
+     * @param string|null $spanId
+     * @param string|null $parentSpanId
+     * @return Core\Span
+     */
+    public function newSpan($name, $traceId = null, $spanId = null, $parentSpanId = null)
+    {
+        $span = new Span(
+            $name,
+            $spanId ?: Identifier::generate(),
+            [],
+            [],
+            $this->recorder->getDebug()
+        );
+
+        if ($this->sample == 0) {
+            $sampled = false;
+        } elseif ($this->sample >= 1.0) {
+            $sampled = true;
+        } else {
+            $sampled = $this->sample > (mt_rand() / mt_getrandmax());
         }
+        $context = new Core\SpanContext(
+            $sampled,
+            $traceId ?: Identifier::generate(),
+            $parentSpanId ?: null
+        );
+        $span->setContext($context);
 
-        $this->debug = $debug;
-    }
-
-    /**
-     * @param Span[] $spans
-     */
-    public function record(array $spans)
-    {
-        if ($this->sampled || $this->debug) {
-            $this->logger->trace($spans);
-        }
-    }
-
-    /**
-     * @param boolean $debug
-     */
-    public function setDebug($debug)
-    {
-        $this->debug = $debug;
-    }
-
-    /**
-     * @param float $sampled
-     * @param bool  $debug
-     * @return Tracer
-     */
-    public static function generateHTTPTracer($sampled = 1.0, $debug = false)
-    {
-        $client = new Client();
-        $logger = new HTTPLogger($client);
-
-        return new self($logger, $sampled, $debug);
+        return $span;
     }
 }

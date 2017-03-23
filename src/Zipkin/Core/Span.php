@@ -3,17 +3,11 @@ namespace Drefined\Zipkin\Core;
 
 class Span
 {
-    /** @var string $name */
-    private $name;
-
-    /** @var Identifier $traceId */
-    private $traceId;
-
     /** @var Identifier $spanId */
     private $spanId;
 
-    /** @var Identifier|null $parentSpanId (optional) */
-    private $parentSpanId;
+    /** @var string $name */
+    private $name;
 
     /** @var Annotation[] $annotations */
     private $annotations;
@@ -30,37 +24,45 @@ class Span
     /** @var int|null $duration (optional) */
     private $duration;
 
+    /** @var SpanContext $context (optional) */
+    private $context;
+
     /**
      * @param string             $name
-     * @param Identifier         $traceId
      * @param Identifier         $spanId
-     * @param Identifier|null    $parentSpanId
      * @param Annotation[]       $annotations
      * @param BinaryAnnotation[] $binaryAnnotations
-     * @param bool|null          $debug
+     * @param bool               $debug
      * @param int|null           $timestamp
      * @param int|null           $duration
+     * @param SpanContext|null   $context
      */
     public function __construct(
         $name,
-        Identifier $traceId,
         Identifier $spanId,
-        Identifier $parentSpanId = null,
         array $annotations = [],
         array $binaryAnnotations = [],
         $debug = false,
         $timestamp = null,
-        $duration = null
+        $duration = null,
+        SpanContext $context = null
     ) {
         $this->name              = $name;
-        $this->traceId           = $traceId;
         $this->spanId            = $spanId;
-        $this->parentSpanId      = $parentSpanId;
         $this->annotations       = $annotations;
         $this->binaryAnnotations = $binaryAnnotations;
         $this->debug             = $debug;
-        $this->timestamp         = $timestamp;
+        $this->timestamp         = $timestamp ?: Time::microseconds();
         $this->duration          = $duration;
+        $this->context           = $context;
+    }
+
+    /**
+     * @return void
+     */
+    public function finish()
+    {
+        $this->duration = Time::microseconds() - $this->timestamp;
     }
 
     /**
@@ -74,25 +76,9 @@ class Span
     /**
      * @return Identifier
      */
-    public function getTraceId()
-    {
-        return $this->traceId;
-    }
-
-    /**
-     * @return Identifier
-     */
     public function getSpanId()
     {
         return $this->spanId;
-    }
-
-    /**
-     * @return Identifier|null
-     */
-    public function getParentSpanId()
-    {
-        return $this->parentSpanId;
     }
 
     /**
@@ -120,14 +106,6 @@ class Span
     }
 
     /**
-     * @param int $timestamp
-     */
-    public function setTimestamp($timestamp)
-    {
-        $this->timestamp = $timestamp;
-    }
-
-    /**
      * @return int|null
      */
     public function getTimestamp()
@@ -141,6 +119,14 @@ class Span
     public function getDuration()
     {
         return $this->duration;
+    }
+
+    /**
+     * @return SpanContext|null
+     */
+    public function getContext()
+    {
+        return $this->context;
     }
 
     /**
@@ -160,17 +146,50 @@ class Span
     }
 
     /**
+     * @param bool $debug
+     */
+    public function setDebug($debug)
+    {
+        $this->debug = $debug;
+    }
+
+    /**
+     * @param int $duration
+     */
+    public function setDuration($duration)
+    {
+        $this->duration = $duration;
+    }
+
+    /**
+     * @param int $timestamp
+     */
+    public function setTimestamp($timestamp)
+    {
+        $this->timestamp = $timestamp;
+    }
+
+    /**
+     * @param SpanContext|null $context
+     */
+    public function setContext(SpanContext $context)
+    {
+        $this->context = $context;
+    }
+
+    /**
      * @return array
      */
     public function toArray()
     {
-        $parentSpanId = (string)$this->getParentSpanId();
+        $context = $this->getContext();
+        $parentSpanId = (string)$context->getParentSpanId();
 
         return [
             'id'                => (string)$this->getSpanId(),
             'name'              => (string)$this->getName(),
-            'traceId'           => (string)$this->getTraceId(),
-            'parentId'          => (empty($parentSpanId)) ? null : (string)$parentSpanId,
+            'traceId'           => (string)$context->getTraceId(),
+            'parentId'          => empty($parentSpanId) ? null : (string)$parentSpanId,
             'timestamp'         => (int)$this->getTimestamp(),
             'duration'          => (int)$this->getDuration(),
             'debug'             => (boolean)$this->getDebug(),
